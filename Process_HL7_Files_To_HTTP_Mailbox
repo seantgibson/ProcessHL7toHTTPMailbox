@@ -1,0 +1,103 @@
+rem Author: Sean Gibson
+rem Date  : 24 April 2015
+
+rem This command file will process a set of files contained within the defined directory
+rem execute a curl script to post the files to an HTTP Mailbox and then move the files
+rem into a new directory.
+
+rem ECHO OFF
+
+set applicationPath=D:\documents\curl
+set rootPath=D:\users\public\documents
+set dirToConvert=%rootPath%\HL7Files\
+set donePath=%rootPath%\HL7FilesProcessed
+set logFilePath=%rootPath%\Logs\
+set logfile=%logFilePath%\HL7FilesProcessed.log
+
+rem Let's get the logfile going before doing anything more important
+:: Check to see if the log file folder exists, if it doesn't, create it.
+IF NOT EXIST "%logFilePath%" MKDIR %logFilePath%
+if not exist %logFilePath% (
+  mkdir %logFilePath%
+  if "!errorlevel!" EQU "0" (
+    echo "%date%_%time%" "%logFilePath%" Folder created successfully >> %logFile%
+  ) else (
+    echo "%date%_%time%" Error while creating folder "%logFilePath%", errorlevel "!errorlevel!" >> %logFile%
+  )
+) else (
+  echo "%date%_%time%" "%logFilePath%" Folder already exists >> %logFile%
+)
+
+IF NOT EXIST "%donePath%" MKDIR %donePath%
+if not exist %donePath% (
+  mkdir %donePath% >> %logFile%
+  if "!errorlevel!" EQU "0" (
+    echo "%date%_%time%" "%donePath%" Folder created successfully >> %logFile%
+  ) else (
+    "%date%_%time%" echo Error while creating folder "%donePath%", errorlevel "!errorlevel!" >> %logFile%
+  )
+) else (
+  echo "%date%_%time%" "%donePath%" Folder already exists >> %logFile%
+)
+
+rem loop through all of the files in the specified directory
+
+FOR /R "D:\users\public\documents\HL7Files\" %%G in (*.txt) DO (
+
+rem Sending the file to the HTTP Mailbox
+rem   curl --request POST -H "Content-type: application/octet-stream"            \
+
+rem        -H "From-party-id: BH_MG_BHMG"                                        \
+
+rem        -H "From-id-qualifier: "                                              \
+
+rem        -H "To-party-id: BAYHLTHDOCSITE"                                      \
+
+rem        -H "To-id-qualifier: "                                                \
+
+rem        -H "Message-type: ADT_A08"                                            \
+
+rem        -H "Message-format: HL7"                                              \
+
+rem        -H "Standard-version: 2.2"                                            \
+
+rem        -w "\\nHTTP Response Code: %{http_code}\\n"                           \
+
+rem        --user covisint123:test123                                            \
+
+rem        --data @%f%                                                \
+
+rem        https://messaging.stg.covisint.com/invoke/HTTPConnector.Mailbox/post >> %logFile%
+
+rem Moving the file from the current directory into the processed directory
+:FILECOPY
+	CD %donePath%
+	copy %%G 
+	echo "%date%_%time%"
+	set myfile=%dirToConvert%%filename%%fileextension%
+
+rem Deconstruct the file path from the filename so that we can check to see if it was copied to the target
+rem folder.
+	FOR /f %%i IN ("%%G") DO (
+		set filedrive=%%~di
+		set filepath=%%~pi
+		set filename=%%~ni
+		set fileextension=%%~xi
+	)
+
+	IF EXIST %filename%%fileextension% (
+		echo "%date%_%time%" Filename "%filename%%fileextension%" successully copied
+	)
+
+rem Cleanup the file in the to be processed directory.
+:FILEDELETE
+	DEL %%G 
+
+	IF NOT EXISTS %myfile% (
+	echo "%date%_%time%" Filename "%myfile%" successfully deleted.
+	)
+
+	CD %applicationPath%
+) >> %logFile%
+
+
