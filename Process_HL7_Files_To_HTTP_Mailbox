@@ -28,6 +28,17 @@ if not exist %logFilePath% (
   echo "%date%_%time%" "%logFilePath%" Folder already exists >> %logFile%
 )
 
+rem Check folder to confirm there are files to work on, if there are, we'll skip to the NOTEMPTY
+rem label.  If there aren't any files, we'll fall through to the command to force us to the end of the script,
+for /F %%i in ('dir /b "D:\Users\Public\Documents\HL7Files\*.*"') do (
+    echo Folder is NON empty, we've got some work to get started on.
+    goto NOTEMPTY
+)
+
+goto EOF
+
+:NOTEMPTY
+
 IF NOT EXIST "%donePath%" MKDIR %donePath%
 if not exist %donePath% (
   mkdir %donePath% >> %logFile%
@@ -74,7 +85,7 @@ rem Moving the file from the current directory into the processed directory
 	CD %donePath%
 	copy %%G 
 	echo "%date%_%time%"
-	set myfile=%dirToConvert%%filename%%fileextension%
+rem	set myfile=%dirToConvert%%filename%%fileextension%
 
 rem Deconstruct the file path from the filename so that we can check to see if it was copied to the target
 rem folder.
@@ -87,17 +98,20 @@ rem folder.
 
 	IF EXIST %filename%%fileextension% (
 		echo "%date%_%time%" Filename "%filename%%fileextension%" successully copied
+		set myfile=%dirToConvert%%filename%%fileextension%
 	)
 
 rem Cleanup the file in the to be processed directory.
 :FILEDELETE
 	DEL %%G 
 
-	IF NOT EXISTS %myfile% (
+	IF NOT EXIST %myfile% (
 	echo "%date%_%time%" Filename "%myfile%" successfully deleted.
 	)
 
 	CD %applicationPath%
+
 ) >> %logFile%
 
-
+:MYEOF
+echo %date%_%time% End of Program Run
