@@ -57,35 +57,22 @@ FOR /R "D:\users\public\documents\HL7Files\" %%G in (*.txt) DO (
 
 rem Sending the file to the HTTP Mailbox
 rem   curl --request POST -H "Content-type: application/octet-stream"            \
-
 rem        -H "From-party-id: BH_MG_BHMG"                                        \
-
 rem        -H "From-id-qualifier: "                                              \
-
 rem        -H "To-party-id: BAYHLTHDOCSITE"                                      \
-
 rem        -H "To-id-qualifier: "                                                \
-
 rem        -H "Message-type: ADT_A08"                                            \
-
 rem        -H "Message-format: HL7"                                              \
-
 rem        -H "Standard-version: 2.2"                                            \
-
 rem        -w "\\nHTTP Response Code: %{http_code}\\n"                           \
-
 rem        --user covisint123:test123                                            \
-
 rem        --data @%f%                                                \
-
 rem        https://messaging.stg.covisint.com/invoke/HTTPConnector.Mailbox/post >> %logFile%
-
 rem Moving the file from the current directory into the processed directory
 :FILECOPY
 	CD %donePath%
 	copy %%G 
 	echo "%date%_%time%"
-rem	set myfile=%dirToConvert%%filename%%fileextension%
 
 rem Deconstruct the file path from the filename so that we can check to see if it was copied to the target
 rem folder.
