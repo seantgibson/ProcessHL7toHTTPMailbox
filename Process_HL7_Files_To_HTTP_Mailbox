@@ -31,11 +31,12 @@ if not exist %logFilePath% (
 rem Check folder to confirm there are files to work on, if there are, we'll skip to the NOTEMPTY
 rem label.  If there aren't any files, we'll fall through to the command to force us to the end of the script,
 for /F %%i in ('dir /b "D:\Users\Public\Documents\HL7Files\*.*"') do (
-    echo Folder is NON empty, we've got some work to get started on.
+    echo %dirToConvert Folder is NON empty, we've got some work to get started on.
     goto NOTEMPTY
 )
 
-goto EOF
+echo %dirToConvert% Folder is Empty, we have nothing to process, exiting program.
+goto MYEOF
 
 :NOTEMPTY
 
@@ -56,18 +57,20 @@ rem loop through all of the files in the specified directory
 FOR /R "D:\users\public\documents\HL7Files\" %%G in (*.txt) DO (
 
 rem Sending the file to the HTTP Mailbox
-rem   curl --request POST -H "Content-type: application/octet-stream"            \
-rem        -H "From-party-id: BH_MG_BHMG"                                        \
-rem        -H "From-id-qualifier: "                                              \
-rem        -H "To-party-id: BAYHLTHDOCSITE"                                      \
-rem        -H "To-id-qualifier: "                                                \
-rem        -H "Message-type: ADT_A08"                                            \
-rem        -H "Message-format: HL7"                                              \
-rem        -H "Standard-version: 2.2"                                            \
-rem        -w "\\nHTTP Response Code: %{http_code}\\n"                           \
-rem        --user covisint123:test123                                            \
-rem        --data @%f%                                                \
-rem        https://messaging.stg.covisint.com/invoke/HTTPConnector.Mailbox/post >> %logFile%
+set curlparam1=--request POST -H "Content-type: application/octet-stream"
+set curlparam2=-H "From-party-id: BH_MG_BHMG"
+set curlparam3=-H "From-id-qualifier: "
+set curlparam4=-H "To-party-id: BAYHLTHDOCSITE"
+set curlparam5=-H "To-id-qualifier: "
+set curlparam6=-H "Message-type: ADT_A08"
+set curlparam7=-H "Message-format: HL7"
+set curlparam8=-H "Standard-version: 2.2"
+set curlparam9=-w "\\nHTTP Response Code: %{http_code}\\n"
+set curlparam10=--user covisint123:test123
+set curlparam11=--data @"%%G" https://messaging.stg.covisint.com/invoke/HTTPConnector.Mailbox/post
+
+curl %curlparam1% %curlparam2% %curlparam3% %curlparam4% %curlparam5% %curlparam6% %curlparam7% %curlparam8% %curlparam9% %curlparam10% %curlparam11%
+
 rem Moving the file from the current directory into the processed directory
 :FILECOPY
 	CD %donePath%
