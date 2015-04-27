@@ -1,0 +1,30 @@
+Additional file attributes that can be extracted using the FOR loop:
+%~1 - expands %1 removing any surrounding quotes (")
+ %~f1 - expands %1 to a fully qualified path name
+ %~d1 - expands %1 to a drive letter only
+ %~p1 - expands %1 to a path only
+ %~n1 - expands %1 to a file name only
+ %~x1 - expands %1 to a file extension only
+ %~s1 - expanded path contains short names only
+ %~a1 - expands %1 to file attributes
+ %~t1 - expands %1 to date/time of file
+ %~z1 - expands %1 to size of file 
+ 
+ IF will only parse numbers when one of (EQU, NEQ, LSS, LEQ, GTR, GEQ) is used. 
+ The == comparison operator always results in a string comparison.
+
+IF ERRORLEVEL n statements should be read as IF Errorlevel >= number
+ i.e.
+IF ERRORLEVEL 0 will return TRUE when the errorlevel is 64 
+
+An alternative and often better method of checking Errorlevels is to use the %ERRORLEVEL% variable:
+
+IF %ERRORLEVEL% GTR 0 Echo An error was found
+ IF %ERRORLEVEL% LSS 0 Echo An error was found
+
+ IF %ERRORLEVEL% EQU 0 Echo No error found
+IF %ERRORLEVEL% EQU 0 (Echo No error found) ELSE (Echo An error was found)
+IF %ERRORLEVEL% EQU 0 Echo No error found || Echo An error was found
+
+Note some errors are negative numbers.
+ When working with errorlevels in a batch file it's a good idea to also use SETLOCAL so that the %ERRORLEVEL% variable is reset each time the batch file runs. 
